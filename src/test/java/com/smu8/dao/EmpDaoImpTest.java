@@ -67,7 +67,8 @@ class EmpDaoImpTest {
         //int delete=empDao.delete(3333);
         //int delete=empDao.delete(7369); // 무결성 제약조건(SCOTT.FK_EMP_PAY)이 위배되었습니다- 자식 레코드가 발견되었습니다
         //int delete=empDao.delete(7839);//무결성 제약조건(SCOTT.SYS_C008270)이 위배되었습니다- 자식 레코드가 발견되었습니다
-        int delete=empDao.delete(7369); //급여기록 삭제 후 삭제
+        //int delete=empDao.delete(7369); //급여기록 삭제 후 삭제
+        int delete=empDao.delete(7839); //급여기록 삭제 및 상사로 참조하는 사원을 null로 변경후 삭제
         System.out.println(delete);
     }
     @Test
@@ -100,5 +101,12 @@ class EmpDaoImpTest {
     void findByEnameContaining() throws SQLException {
         List<EmpDto> emps=empDao.findByEnameContaining("i");
         System.out.println(emps);
+    }
+
+    @Test
+    void updateMgrToNull() throws SQLException {
+        int mgr=7839;//king
+        int update=empDao.updateMgrToNull(mgr);
+        System.out.println(update);
     }
 }

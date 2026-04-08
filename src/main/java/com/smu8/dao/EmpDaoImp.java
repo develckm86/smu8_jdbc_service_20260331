@@ -16,6 +16,16 @@ public class EmpDaoImp implements EmpDao{
     }
 
     @Override
+    public int updateMgrToNull(int mgr) throws SQLException {
+        int update=0;
+        String sql="UPDATE EMP SET mgr=null WHERE mgr=?";
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setInt(1,mgr);
+        update=ps.executeUpdate();
+        return update;
+    }
+
+    @Override
     public void insert(EmpDto emp) throws SQLException {
         String sql="""
                     INSERT INTO EMP (empno, ename, job, mgr, hiredate, sal, comm, deptno)
