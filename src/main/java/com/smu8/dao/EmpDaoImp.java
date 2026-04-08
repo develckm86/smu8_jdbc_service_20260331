@@ -43,16 +43,7 @@ public class EmpDaoImp implements EmpDao{
         ResultSet rs=st.executeQuery(sql);
         emps=new ArrayList<>();
         while (rs.next()){
-            EmpDto emp=new EmpDto(
-                    rs.getInt("empno"),
-                    rs.getString("ename"),
-                    rs.getString("job"),
-                    rs.getObject("mgr",Integer.class),
-                    rs.getObject("hiredate", LocalDate.class),
-                    rs.getObject("sal", Double.class),
-                    rs.getObject("comm", Double.class),
-                    rs.getObject("deptno", Integer.class)
-            );
+            EmpDto emp=parse(rs);
             emps.add(emp);
         }
         return emps;
@@ -73,7 +64,17 @@ public class EmpDaoImp implements EmpDao{
 
     @Override
     public List<EmpDto> findByDeptno(int deptno) throws SQLException {
-        return List.of();
+        List<EmpDto> emps=null;
+        String sql="SELECT * FROM EMP WHERE DEPTNO=?";
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setInt(1,deptno);
+        ResultSet rs=ps.executeQuery();
+        emps=new ArrayList<>();
+        while (rs.next()){
+            EmpDto emp=parse(rs);
+            emps.add(emp);
+        }
+        return emps;
     }
 
     @Override

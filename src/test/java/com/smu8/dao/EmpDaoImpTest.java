@@ -51,9 +51,11 @@ class EmpDaoImpTest {
         System.out.println(emp);
         //Assertions.assertNotNull(emp);
     }
-
+    //**ai (test)
     @Test
-    void findByDeptno() {
+    void findByDeptno() throws SQLException{
+        List<EmpDto> emps =empDao.findByDeptno(20);
+        System.out.println(emps);
     }
 
     @Test
