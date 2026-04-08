@@ -17,12 +17,46 @@ public class EmpDaoImp implements EmpDao{
 
     @Override
     public void insert(EmpDto emp) throws SQLException {
-
+        String sql="""
+                    INSERT INTO EMP (empno, ename, job, mgr, hiredate, sal, comm, deptno)
+                    VALUES (?,?,?,?,?,?,?,?)
+                    """;
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setInt(1,emp.getEmpno());
+        ps.setString(2,emp.getEname());
+        ps.setString(3,emp.getJob());
+        //ps.setInt(4,emp.getMgr()); //오류 or null
+        //if(emp.getMgr()==null){ps.setNull(4,emp.getMgr());}else{ps.setInt(4,emp.getMgr());} //권장
+        ps.setObject(4,emp.getMgr()); //권장하지 않지만 Null 처리
+        ps.setObject(5,emp.getHiredate()); //localdate.string : 'yyyy-mm-dd'
+        ps.setObject(6,emp.getSal());
+        ps.setObject(7,emp.getComm());
+        ps.setObject(8,emp.getDeptno());
+        ps.executeUpdate(); //dml
     }
 
     @Override
     public int update(EmpDto emp) throws SQLException {
-        return 0;
+        int update=0;
+        String sql="""
+        UPDATE EMP SET 
+               ENAME=?, JOB=?,
+               SAL=?, COMM=?,
+               HIREDATE=?,
+               MGR=?, DEPTNO=?
+            WHERE EMPNO=?
+                       """;
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setString(1,emp.getEname());
+        ps.setString(2,emp.getJob());
+        if(emp.getSal()==null){ps.setNull(3, Types.NUMERIC);}else{ps.setDouble(3,emp.getSal());}
+        if(emp.getComm()==null) {ps.setNull(4, Types.NUMERIC);}else {ps.setDouble(4,emp.getComm());}
+        ps.setObject(5,emp.getHiredate());
+        if(emp.getMgr()==null){ps.setNull(6,Types.NUMERIC);}else{ps.setInt(6,emp.getMgr());}
+        if(emp.getDeptno()==null){ps.setNull(7,Types.NUMERIC);}else{ps.setInt(7,emp.getDeptno());}
+        ps.setInt(8,emp.getEmpno()); //수정할 사번은 꼭 있어야함
+        update=ps.executeUpdate();
+        return update;
     }
 
     @Override
@@ -76,10 +110,19 @@ public class EmpDaoImp implements EmpDao{
         }
         return emps;
     }
-
     @Override
     public List<EmpDto> findByEnameContaining(String ename) throws SQLException {
-        return List.of();
+        List<EmpDto> emps=null;
+//        String sql="SELECT * FROM EMP WHERE ENAME LIKE '%?%'"; //문자열 내부에 ? 가 있으면 ps가 못찾음
+        String sql="SELECT * FROM EMP WHERE  UPPER( ENAME )  LIKE  UPPER( ? )";
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setString(1,"%"+ename+"%");
+        ResultSet rs=ps.executeQuery();
+        emps=new ArrayList<>();
+        while (rs.next()){
+            emps.add(parse(rs));
+        }
+        return emps;
     }
     //ResultSet->EmpDpt (파스: 형변환)
     //resultSetParseEmpDto

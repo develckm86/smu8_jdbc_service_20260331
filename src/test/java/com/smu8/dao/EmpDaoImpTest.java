@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,11 +24,35 @@ class EmpDaoImpTest {
     }
 
     @Test
-    void insert() {
+    void insert() throws SQLException {
+        //타입보다 크기가 클때,참조할 부모가 없을때 (emp,deptno), 사원번호가 이미 사용중
+        EmpDto emp=new EmpDto(
+                5555,
+                "test5",
+                "test5",
+                3333,
+                LocalDate.now(),
+                5555.0,
+                55.0,
+                30
+        );
+        empDao.insert(emp);
     }
 
     @Test
-    void update() {
+    void update() throws SQLException {
+        EmpDto emp=new EmpDto(
+                5555,
+                "upTester5",
+                "upTest5",
+                7902,
+                LocalDate.of(2002,2,2),
+                2002.0,
+                22.0,
+                20
+        );
+        int update=empDao.update(emp);
+        System.out.println(update); //존재하는 사원이면 1
     }
 
     @Test
@@ -59,6 +84,8 @@ class EmpDaoImpTest {
     }
 
     @Test
-    void findByEnameContaining() {
+    void findByEnameContaining() throws SQLException {
+        List<EmpDto> emps=empDao.findByEnameContaining("i");
+        System.out.println(emps);
     }
 }
