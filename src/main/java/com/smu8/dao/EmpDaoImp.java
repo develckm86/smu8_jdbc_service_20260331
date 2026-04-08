@@ -61,12 +61,21 @@ public class EmpDaoImp implements EmpDao{
 
     @Override
     public int delete(int empno) throws SQLException {
-        return 0;
+        int delete=0;
+        String sql="DELETE FROM EMP WHERE EMPNO=?";
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setInt(1,empno);
+        delete=ps.executeUpdate();
+        return delete;
     }
-
     @Override
     public int deletePayHistroy(int empno) throws SQLException {
-        return 0;
+        int delete=0;
+        String sql="DELETE FROM PAY_HISTORY WHERE EMPNO=?";
+        PreparedStatement ps=conn.prepareStatement(sql);
+        ps.setInt(1,empno);
+        delete=ps.executeUpdate();
+        return delete;
     }
 
     @Override

@@ -56,11 +56,24 @@ class EmpDaoImpTest {
     }
 
     @Test
-    void delete() {
-    }
+    void delete() throws SQLException {
+        //사원을 지울때 오류
+        //상사로 참조되고 있을 때(mgr) => set Null (dao 구현 후 참조하는 사원이 있는 사원 삭제 )
+        //급여기록이 있을 때 (mgr) => cascade
 
+        //1. 상사와 급여기록이 없는 사원 삭제  3333,5555
+        //2. 급여기록이 있는 사원 삭제
+        //3. 상사가 있는 사원
+        //int delete=empDao.delete(3333);
+        //int delete=empDao.delete(7369); // 무결성 제약조건(SCOTT.FK_EMP_PAY)이 위배되었습니다- 자식 레코드가 발견되었습니다
+        //int delete=empDao.delete(7839);//무결성 제약조건(SCOTT.SYS_C008270)이 위배되었습니다- 자식 레코드가 발견되었습니다
+        int delete=empDao.delete(7369); //급여기록 삭제 후 삭제
+        System.out.println(delete);
+    }
     @Test
-    void deletePayHistroy() {
+    void deletePayHistroy() throws SQLException {
+        int delete=empDao.deletePayHistroy(7369); //king 의 급여기록 삭제
+        System.out.println(delete);//2
     }
 
     @Test
