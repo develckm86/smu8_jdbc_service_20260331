@@ -47,14 +47,29 @@ class EmpServiceImpTest {
     void registerEmp() throws SQLException {
         EmpDto emp=new EmpDto(
                 88,
-                "serviceTes",
+                "service88",
                 "tester",
-                99,
+                null,
                 LocalDate.now(),
                 100.0,
                 11.0,
                 10
         );
         empService.registerEmp(emp);
+    }
+
+    @Test
+    void modifyEmp() throws SQLException {
+        EmpDto emp=new EmpDto(
+                88,
+                "수정이",
+                "modify",
+                7654,
+                LocalDate.of(1988,1,1),
+                1234.11,
+                34.22,
+                10
+        );
+        empService.modifyEmp(emp);
     }
 }

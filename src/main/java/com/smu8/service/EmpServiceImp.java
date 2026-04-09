@@ -125,7 +125,19 @@ public class EmpServiceImp implements EmpService{
 
     @Override
     public void modifyEmp(EmpDto emp) throws SQLException, IllegalArgumentException {
-
+        //1.없는 사원은 수정 못함 ->IllegalArgumentException
+        //2. 무결성+타입의 크기 SQLException (** 타입의 크기는 validBean 에서 유효성 검사 가능)
+        //3. 트랜잭션이 필요 없이 (수정삭제등록이 2개 이상일때 1개의 단위로 묶는것)
+        //4. 없는 상사 ->IllegalArgumentException
+        //5. 없는 부서 ->IllegalArgumentException (DeptDao 구현 후)
+        try (Connection conn=dataSource.getConnection()){
+            EmpDao empDao=new EmpDaoImp(conn);
+            if(empDao.findByEmpno(emp.getEmpno())==null)
+                throw  new IllegalArgumentException("존재하지 않는 사원입니다.");
+            if(emp.getMgr()!=null && empDao.findByEmpno(emp.getMgr())==null)
+                throw  new IllegalArgumentException("존재하지 않는 상사입니다.");
+            int update=empDao.update(emp);
+            System.out.println("수정 성공 :"+update);
+        }
     }
-
 }
