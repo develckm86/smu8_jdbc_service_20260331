@@ -4,6 +4,15 @@ public class DeptDto {
     private int deptno; //pk Number(2)
     private String dename;// Varchar2(14)
     private String loc;// Varchar2(13)
+
+    public DeptDto(){}
+
+    public DeptDto(int deptno, String dename, String loc) {
+        this.deptno = deptno;
+        this.dename = dename;
+        this.loc = loc;
+    }
+
     @Override
     public String toString() {
         return "{" +
