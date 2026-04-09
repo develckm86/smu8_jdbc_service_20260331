@@ -22,7 +22,7 @@ public interface EmpService {
     //이름으로 검색 like '%경%'
     List<EmpDto> searchEmps(String ename);
 
-    void registerEmp(EmpDto emp) throws SQLException;
+    void registerEmp(EmpDto emp) throws SQLException, IllegalArgumentException;
     void modifyEmp(EmpDto emp) throws SQLException,IllegalArgumentException;
     //SQLException uk,유효성검사오류,IllegalArgumentException 존재하지 않는 레코드일때
 

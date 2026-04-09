@@ -109,7 +109,7 @@ public class EmpDaoImp implements EmpDao{
         PreparedStatement ps=conn.prepareStatement(sql);
         ps.setInt(1,empno);
         ResultSet rs=ps.executeQuery();
-        while (rs.next()){
+        if (rs.next()){//결과가 한개가 나오려면 조건이 pk,uk or 집계쿼리
             emp=parse(rs);
         }
         return emp;

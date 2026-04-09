@@ -4,6 +4,7 @@ import com.smu8.DBManager;
 import com.smu8.dao.EmpDao;
 import com.smu8.dao.EmpDaoImp;
 import com.smu8.dto.EmpDto;
+import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,17 +12,19 @@ import java.util.List;
 
 public class EmpServiceImp implements EmpService{
     //필요한 필드: 접속객체, EmpDao 객체
-    private final Connection conn;
-    private final EmpDao empDao;
+//    private final Connection conn;
+    private final HikariDataSource dataSource;
+    //private EmpDao empDao;
     //내부에서 conn 호출 및 dao 생성
     public EmpServiceImp() throws SQLException {
-        this.conn= DBManager.getInstance().getConnection();
-        this.empDao=new EmpDaoImp(conn);
+        //this.conn= DBManager.getInstance().getConnection();
+        //this.empDao=new EmpDaoImp(conn);
+        this.dataSource=DBManager.getInstance().getDataSource();
+        //서비스에서 Auto close 사용하기 위해
     }
     //외부에서 두객체를 받아서 사용
-    public EmpServiceImp(Connection conn, EmpDao empDao) {
-        this.conn = conn;
-        this.empDao = empDao;
+    public EmpServiceImp(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
     }
     //사원을 삭제
     //1. 지울 사원이 있는지 확인 -> 없으면 오류
@@ -31,7 +34,10 @@ public class EmpServiceImp implements EmpService{
     //5. 이중 하나라도 오류발생하면 rollback
     @Override
     public void removeEmp(int id) throws IllegalArgumentException{
+        Connection conn=null;
         try {
+            conn=dataSource.getConnection();
+            EmpDao empDao=new EmpDaoImp(conn);
             conn.setAutoCommit(false);
             conn.commit();
             EmpDto existEmp=empDao.findByEmpno(id);
@@ -46,34 +52,75 @@ public class EmpServiceImp implements EmpService{
         } catch (SQLException | IllegalArgumentException e) {
             try{conn.rollback();}catch (Exception ex){} //transaction 으로 한개의 단위로 생성
             throw new RuntimeException(e);
-        } finally {
+        }
+        finally {
             try {conn.close();} catch (Exception e) {}//이미 닫혔는데 또 닫을때,통신이 끓어졌을때,null
         }
     }
 
     @Override
     public EmpDto getDetail(int id) {
-        return null;
+        EmpDto emp=null;
+        try (Connection conn=dataSource.getConnection()){
+            EmpDao empDao=new EmpDaoImp(conn);
+            emp=empDao.findByEmpno(id);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return emp;
     }
 
     @Override
-    public List<EmpDto> getEmps() {
-        return List.of();
+    public List<EmpDto> getEmps() { //전체 조회
+        List<EmpDto> emps=null;
+        try(Connection conn=dataSource.getConnection()){
+            EmpDao empDao=new EmpDaoImp(conn);
+            emps=empDao.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return emps;
     }
 
     @Override
     public List<EmpDto> getEmps(int deptno) {
-        return List.of();
+        List<EmpDto> emps=null;
+        try (Connection conn=dataSource.getConnection()){
+            EmpDao empDao=new EmpDaoImp(conn);
+            emps=empDao.findByDeptno(deptno);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return emps;
     }
-
     @Override
     public List<EmpDto> searchEmps(String ename) {
-        return List.of();
+        List<EmpDto> emps=null;
+        try (Connection conn=dataSource.getConnection()){
+            EmpDao empDao=new EmpDaoImp(conn);
+            emps=empDao.findByEnameContaining(ename);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return emps;
     }
 
     @Override
-    public void registerEmp(EmpDto emp) throws SQLException {
-
+    public void registerEmp(EmpDto emp) throws SQLException, IllegalArgumentException {
+        //1. 이미 등록된 사원은 오류 IllegalArgumentException
+        //2. 무결성+타입의 크기 SQLException (** 타입의 크기는 validBean 에서 유효성 검사 가능)
+        //3. 트랜잭션이 필요 없이 (수정삭제등록이 2개 이상일때 1개의 단위로 묶는것)
+        try (Connection conn=dataSource.getConnection()){
+            EmpDao empDao=new EmpDaoImp(conn);
+            EmpDto existEmp=empDao.findByEmpno(emp.getEmpno());
+            if(existEmp!=null) throw new IllegalArgumentException("이미 존재하는 사원이 있습니다.");
+            if(emp.getMgr()!=null){
+                EmpDto existMgr=empDao.findByEmpno(emp.getMgr());
+                if(existMgr==null)throw new IllegalArgumentException("존재하지 않는 상사 입니다.");
+            }
+            //if(emp.getMgr()!=null && empDao.findByEmpno(emp.getMgr())==null) throw new IllegalArgumentException("존재하지 않는 상사");
+            empDao.insert(emp);
+        }
     }
 
     @Override

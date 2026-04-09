@@ -30,7 +30,9 @@ public class DBManager {
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
-
+    public HikariDataSource getDataSource(){
+        return dataSource;
+    }
 }
 
 
